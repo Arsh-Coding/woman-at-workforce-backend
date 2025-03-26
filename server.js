@@ -19,6 +19,7 @@ app.use(cors());
 // app.use(cors({ origin: "http://localhost:5173" }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 app.use(express.static(process.cwd() + "/uploads"));
 connectDB();
 
@@ -31,5 +32,13 @@ app.use("/companies", companyRoutes);
 app.use("/profile", profileRoutes);
 app.use("/", resumeRoutes);
 app.use("/locations", locationRoutes);
+
+app.use(express.static(path.join(__dirname, "build"))); // Change "build" to your React build folder
+
+// ✅ Redirect all unknown routes to React index.html
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
