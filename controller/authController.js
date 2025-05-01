@@ -1,16 +1,16 @@
-const User = require("../models/User");
+const User = require("../models/User.model");
 const bcrypt = require("bcryptjs");
 const { generateToken } = require("../services/jwtServices");
 
 const signup = async (req, res) => {
   try {
-    const { username, email, password, phone, ...profileData } = req.body;
+    const { username, email, password, ...profileData } = req.body;
 
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser)
       return res.status(400).json({ message: "User already exists" });
 
-    const user = new User({ username, email, password, phone, ...profileData });
+    const user = new User({ username, email, password, ...profileData });
     const token = generateToken({ userId: user._id });
 
     user.tokens = [{ token }];
@@ -23,8 +23,6 @@ const signup = async (req, res) => {
         userId: user._id,
         username: user.username,
         email: user.email,
-        phone: user.phone,
-        ...profileData,
       },
     });
   } catch (error) {

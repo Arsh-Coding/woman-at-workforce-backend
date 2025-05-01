@@ -12,6 +12,7 @@ const categoryRoutes = require("./routes/categoryRoutes");
 const jobRoutes = require("./routes/jobRoutes");
 const resumeRoutes = require("./routes/resumeRoutes");
 const locationRoutes = require("./routes/locationRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 const app = express();
 
@@ -32,13 +33,14 @@ app.use("/companies", companyRoutes);
 app.use("/profile", profileRoutes);
 app.use("/", resumeRoutes);
 app.use("/locations", locationRoutes);
+app.use("/notifications", notificationRoutes);
 
-app.use(express.static(path.join(__dirname, "build"))); // Change "build" to your React build folder
+// app.use(express.static(path.join(__dirname, "dist"))); // Change "build" to your React build folder
 
-// ✅ Redirect all unknown routes to React index.html
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "build", "index.html"));
-});
+// // ✅ Redirect all unknown routes to React index.html
+// app.get("*", (req, res) => {
+//   res.sendFile(path.join(__dirname, "dist", "index.html"));
+// });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
