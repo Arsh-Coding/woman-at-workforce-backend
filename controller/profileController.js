@@ -1,5 +1,5 @@
 const path = require("path");
-const User = require("../models/User");
+const User = require("../models/User.model");
 const updatedProfilePic = async (req, res) => {
   try {
     if (!req.file) {
@@ -17,6 +17,7 @@ const updatedProfilePic = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
 const updateProfile = async (req, res) => {
   try {
     debugger;

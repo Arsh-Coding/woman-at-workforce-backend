@@ -1,6 +1,6 @@
-const Country = require("../models/country");
-const State = require("../models/state");
-const City = require("../models/city");
+const Country = require("../models/country.model");
+const State = require("../models/state.model");
+const City = require("../models/city.model");
 
 exports.getCountries = async (req, res) => {
   try {

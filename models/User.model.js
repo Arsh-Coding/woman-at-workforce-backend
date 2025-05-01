@@ -6,7 +6,8 @@ const userSchema = new mongoose.Schema(
     userId: { type: mongoose.Schema.Types.ObjectId, auto: true },
     username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
-    phone: { type: String, required: true, unique: true },
+    phone: { type: String, unique: true },
+    resumeUrl: { type: String },
     website: { type: String },
     jobDescription: { type: String },
     address: { type: String },
@@ -21,6 +22,7 @@ const userSchema = new mongoose.Schema(
     verificationEmail: { type: String },
     imageUrl: { type: String },
     password: { type: String, required: true },
+    appliedJobs: [{ type: Number }],
   },
   { timestamps: true }
 );
