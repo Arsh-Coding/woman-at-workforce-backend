@@ -22,30 +22,21 @@ const getJobById = async (req, res) => {
     res.status(500).json({ error: "Server Error" });
   }
 };
+
 const getJobStats = async (req, res) => {
   try {
     const totalJobs = await JobData.countDocuments();
 
-    // Let's say "active" jobs are those posted in the last 30 days
-    const today = new Date();
-    const thirtyDaysAgo = new Date(today.setDate(today.getDate() - 30));
+   
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 
     const activeJobs = await JobData.countDocuments({
-      datePosted: { $gte: thirtyDaysAgo.toISOString().split("T")[0] },
+      datePosted: { $gte: oneYearAgo },
     });
 
-    const users = await User.find({}, "appliedJobs");
-    const appliedJobsSet = new Set();
-
-    users.forEach((user) => {
-      user.appliedJobs.forEach((jobId) => {
-        if (typeof jobId === "number" && jobId > 0 && jobIdSet.has(jobId)) {
-          appliedJobsSet.add(jobId);
-        }
-      });
-    });
-
-    const appliedJobs = appliedJobsSet.size;
+    const users = await User.findById(req.user._id);
+    const appliedJobs = users?.appliedJobs?.length;
 
     res.json({ totalJobs, activeJobs, appliedJobs });
   } catch (err) {
@@ -54,3 +45,16 @@ const getJobStats = async (req, res) => {
 };
 
 module.exports = { getJobs, getJobById, getJobStats };
+ // Let's say "active" jobs are those posted in the last 30 days
+    // const today = new Date();
+    // const oneYearAgo = new Date();
+    // oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    // console.log(oneYearAgo);
+    // const lastYear = oneYearAgo.toISOString().split("T")[0];
+    // const activeJobs = await JobData.countDocuments({
+    //   datePosted: {
+    //     $gte: oneYearAgo,
+    //     $lte: today,
+    //   },
+    // });
+    // console.log(today);

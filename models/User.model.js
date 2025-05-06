@@ -22,7 +22,12 @@ const userSchema = new mongoose.Schema(
     verificationEmail: { type: String },
     imageUrl: { type: String },
     password: { type: String, required: true },
-    appliedJobs: [{ type: Number }],
+    appliedJobs: [
+      {
+        jobId: { type: Number, required: true },
+        dateApplied: { type: Date, default: Date.now },
+      },
+    ],
   },
   { timestamps: true }
 );
