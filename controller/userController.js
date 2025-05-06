@@ -166,7 +166,7 @@ const applyToJob = async (req, res) => {
         .json({ success: false, message: "Already applied to this job" });
     }
 
-    user.appliedJobs.push(jobId);
+    user.appliedJobs.push({ jobId: Number(jobId) });
     await user.save();
 
     return res.status(200).json({
