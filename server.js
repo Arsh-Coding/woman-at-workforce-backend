@@ -13,6 +13,9 @@ const jobRoutes = require("./routes/jobRoutes");
 const resumeRoutes = require("./routes/resumeRoutes");
 const locationRoutes = require("./routes/locationRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
+const planRoutes = require("./routes/planRoutes");
+const applicationRoutes = require("./routes/applicantRoutes");
+const contactRoutes = require("./routes/contactRoutes");
 
 const app = express();
 
@@ -34,6 +37,9 @@ app.use("/profile", profileRoutes);
 app.use("/", resumeRoutes);
 app.use("/locations", locationRoutes);
 app.use("/notifications", notificationRoutes);
+app.use("/plans", planRoutes);
+app.use("/applicants", applicationRoutes);
+app.use("/", contactRoutes);
 
 // app.use(express.static(path.join(__dirname, "dist"))); // Change "build" to your React build folder
 

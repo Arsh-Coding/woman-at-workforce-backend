@@ -4,16 +4,45 @@ const { generateToken } = require("../services/jwtServices");
 
 const signup = async (req, res) => {
   try {
-    const { username, email, password, ...profileData } = req.body;
+    const {
+      username,
+      email,
+      password,
+      phone,
+      role, // "employer" or "jobseeker"
+      companyName,
+      companyId,
+      ...otherProfileData
+    } = req.body;
 
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser)
       return res.status(400).json({ message: "User already exists" });
 
-    const user = new User({ username, email, password, ...profileData });
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUserData = {
+      username,
+      email,
+      password: hashedPassword,
+      role: role || "jobseeker",
+      ...otherProfileData,
+    };
+
+    // Only store companyName now if employer
+    if (role === "employer") {
+      newUserData.companyDetails = {
+        companyName,
+        companyId,
+        phone,
+      };
+    }
+
+    const user = new User(newUserData);
     const token = generateToken({ userId: user._id });
 
     user.tokens = [{ token }];
+
     await user.save();
 
     res.status(201).json({
@@ -23,6 +52,9 @@ const signup = async (req, res) => {
         userId: user._id,
         username: user.username,
         email: user.email,
+        phone: user.phone,
+        role: user.role,
+        companyDetails: user.companyDetails || null,
       },
     });
   } catch (error) {
@@ -57,7 +89,7 @@ const login = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error logging in" });
+    res.status(500).json({ message: "Error logging in", error });
   }
 };
 

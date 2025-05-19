@@ -1,7 +1,15 @@
 const mongoose = require("mongoose");
 
+const roleSchema = new mongoose.Schema({
+  role: { type: String, required: true },
+  requirements: [{ type: String }],
+  responsibilities: [{ type: String }],
+  optionalConditions: [{ type: String }],
+  importantDetails: [{ type: String }],
+});
+
 const jobDataSchema = new mongoose.Schema({
-  id: { type: Number, required: true },
+  id: { type: Number, required: true, unique: true },
   title: { type: String, required: true },
   location: { type: String, required: true },
   remote: { type: Boolean, required: true }, // Adjusted based on the JSON
@@ -11,6 +19,8 @@ const jobDataSchema = new mongoose.Schema({
   description: { type: String, required: true },
   featured: { type: Boolean, required: true }, // Adjusted to Boolean instead of string
   companyId: { type: Number, required: true },
+  salary: { type: String, required: true }, // New: formatted salary string
+  roles: [roleSchema],
 });
 
 module.exports = mongoose.model("JobData", jobDataSchema, "jobData");
