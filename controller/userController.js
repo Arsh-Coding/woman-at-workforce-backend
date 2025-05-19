@@ -1,3 +1,4 @@
+const User = require("../models/User.model");
 const getUserProfile = async (req, res) => {
   try {
     const user = req.user;
@@ -20,11 +21,13 @@ const getUserProfile = async (req, res) => {
       imageUrl,
       zipCode,
       google,
+      role,
       facebook,
       twitter,
       linkedin,
       verificationEmail,
       createdAt,
+      companyDetails,
       resumeUrl,
       appliedJobs,
     } = user;
@@ -47,10 +50,12 @@ const getUserProfile = async (req, res) => {
         zipCode,
         google,
         facebook,
+        role,
         twitter,
         linkedin,
         verificationEmail,
         createdAt,
+        companyDetails,
         resumeUrl,
         appliedJobs,
       },
@@ -63,7 +68,7 @@ const getUserProfile = async (req, res) => {
 
 const updateUserProfile = async (req, res) => {
   try {
-    const user = req.user; // Make sure this is populated correctly from auth middleware
+    const user = req.user; // Auth middleware must populate this
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -71,6 +76,7 @@ const updateUserProfile = async (req, res) => {
       });
     }
 
+    // Basic user fields that can be updated
     const updatableFields = [
       "username",
       "email",
@@ -88,56 +94,44 @@ const updateUserProfile = async (req, res) => {
       "linkedin",
       "imageUrl",
       "verificationEmail",
+      "role", // ✅ Allow role update
     ];
 
+    // Update simple fields
     updatableFields.forEach((field) => {
       if (req.body[field] !== undefined) {
         user[field] = req.body[field];
       }
     });
 
-    await user.save();
+    // ✅ Update company details if provided
+    if (req.body.companyDetails) {
+      const companyFields = [
+        "companyId",
+        "companyName",
+        "companyWebsite",
+        "companyEmail",
+        "companySize",
+        "companyIndustry",
+        "companyAddress",
+        "companyDescription",
+      ];
 
-    const {
-      _id,
-      username,
-      email,
-      phone,
-      website,
-      jobDescription,
-      address,
-      country,
-      state,
-      city,
-      zipCode,
-      google,
-      facebook,
-      twitter,
-      linkedin,
-      verificationEmail,
-    } = user;
+      user.companyDetails = user.companyDetails || {};
+
+      companyFields.forEach((field) => {
+        if (req.body.companyDetails[field] !== undefined) {
+          user.companyDetails[field] = req.body.companyDetails[field];
+        }
+      });
+    }
+
+    await user.save();
 
     return res.status(200).json({
       success: true,
       message: "Profile updated successfully",
-      data: {
-        _id,
-        username,
-        email,
-        phone,
-        website,
-        jobDescription,
-        address,
-        country,
-        state,
-        city,
-        zipCode,
-        google,
-        facebook,
-        twitter,
-        linkedin,
-        verificationEmail,
-      },
+      data: user, // optionally filter sensitive fields
     });
   } catch (error) {
     console.error("Update Error:", error);
@@ -185,7 +179,10 @@ const applyToJob = async (req, res) => {
 const removeAppliedJob = async (req, res) => {
   try {
     const user = req.user;
+    // console.log(user.appliedJobs.findIndex((job) => job.jobId === 1));
+
     const { jobId } = req.body;
+    // console.log(jobId);
 
     if (!jobId && jobId !== 0) {
       return res
@@ -194,7 +191,9 @@ const removeAppliedJob = async (req, res) => {
     }
 
     // Check if job exists in appliedJobs
-    const index = user.appliedJobs.indexOf(jobId);
+    const index = user.appliedJobs.findIndex((job) => job.jobId === jobId);
+    // console.log(index);
+
     if (index === -1) {
       return res
         .status(404)
@@ -218,10 +217,22 @@ const removeAppliedJob = async (req, res) => {
     });
   }
 };
+const deleteProfile = async (req, res) => {
+  try {
+    const userId = req.user._id; // from auth middleware
 
+    await User.findByIdAndDelete(userId);
+
+    res.status(200).json({ message: "Profile deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting profile:", err);
+    res.status(500).json({ error: "Something went wrong" });
+  }
+};
 module.exports = {
   getUserProfile,
   updateUserProfile,
   applyToJob,
   removeAppliedJob,
+  deleteProfile,
 };
