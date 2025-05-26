@@ -217,6 +217,7 @@ const removeAppliedJob = async (req, res) => {
     });
   }
 };
+
 const deleteProfile = async (req, res) => {
   try {
     const userId = req.user._id; // from auth middleware
@@ -229,6 +230,7 @@ const deleteProfile = async (req, res) => {
     res.status(500).json({ error: "Something went wrong" });
   }
 };
+
 module.exports = {
   getUserProfile,
   updateUserProfile,
