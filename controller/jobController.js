@@ -4,8 +4,13 @@ const Company = require("../models/company.model");
 
 const getJobs = async (req, res) => {
   try {
-    const jobs = await JobData.find();
-    res.json(jobs);
+    const offset = parseInt(req.query.offset) || 0;
+    const limit = parseInt(req.query.limit) || 10;
+    const jobs = await JobData.find().skip(offset).limit(limit);
+
+    const totalJobs = await JobData.countDocuments();
+
+    res.json({ jobs, totalJobs });
   } catch (err) {
     res.status(500).send(err.message);
   }
