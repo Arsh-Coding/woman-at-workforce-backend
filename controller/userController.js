@@ -1,4 +1,5 @@
 const User = require("../models/User.model");
+const Jobs = require("../models/job.model");
 const getUserProfile = async (req, res) => {
   try {
     const user = req.user;
@@ -218,6 +219,37 @@ const removeAppliedJob = async (req, res) => {
   }
 };
 
+const removePostedJob = async (req, res) => {
+  try {
+    const { jobId } = req.body;
+    const user = req.user;
+
+    if (user.role !== "employer") {
+      return res.status(403).json({ success: false, message: "Unauthorized" });
+    }
+
+    const job = await Jobs.findOneAndDelete({
+      id: jobId,
+      companyId: user.companyDetails.companyId,
+    });
+
+    if (!job) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Job not found or not authorized" });
+    }
+
+    res
+      .status(200)
+      .json({ success: true, message: "Job deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting job", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Server error while deleting job" });
+  }
+};
+
 const deleteProfile = async (req, res) => {
   try {
     const userId = req.user._id; // from auth middleware
@@ -236,5 +268,6 @@ module.exports = {
   updateUserProfile,
   applyToJob,
   removeAppliedJob,
+  removePostedJob,
   deleteProfile,
 };

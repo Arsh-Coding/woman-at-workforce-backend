@@ -4,6 +4,14 @@ const Company = require("../models/company.model");
 
 const getJobs = async (req, res) => {
   try {
+    // console.log("here", req.user);
+    // const user = req.user;
+    // if (!user) {
+    //   return res.status(404).json({
+    //     success: false,
+    //     message: "User not found",
+    //   });
+    // }
     const offset = parseInt(req.query.offset) || 0;
     const limit = parseInt(req.query.limit) || 10;
     const jobs = await JobData.find().skip(offset).limit(limit);
@@ -146,7 +154,53 @@ const postJob = async (req, res) => {
   }
 };
 
-module.exports = { getJobs, getJobById, getJobStats, postJob };
+const getAppliedJobs = async (req, res) => {
+  // console.log("entered applied jobs");
+  try {
+    const user = req.user;
+    // console.log("called user", user);
+
+    if (!user || !user.appliedJobs || user.appliedJobs.length === 0) {
+      return res.status(200).json({ jobs: [] });
+    }
+    const appliedJobsIds = user.appliedJobs.map((j) => j.jobId);
+    const jobs = await JobData.find({ id: { $in: appliedJobsIds } });
+    res.status(200).json({ jobs });
+  } catch (error) {
+    console.error("Error fetching applied jobs: ", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+const getPostedJobs = async (req, res) => {
+  try {
+    const user = req.user;
+
+    if (!user || user.role !== "employer" || !user.companyDetails?.companyId) {
+      return res
+        .status(403)
+        .json({ message: "Unauthorized or missing company ID" });
+    }
+
+    const companyId = parseInt(user.companyDetails.companyId);
+
+    const jobs = await JobData.find({ companyId });
+
+    res.status(200).json({ jobs });
+  } catch (error) {
+    console.error("Error fetching posted jobs:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+module.exports = {
+  getJobs,
+  getJobById,
+  getJobStats,
+  postJob,
+  getAppliedJobs,
+  getPostedJobs,
+};
 
 // Let's say "active" jobs are those posted in the last 30 days
 // const today = new Date();

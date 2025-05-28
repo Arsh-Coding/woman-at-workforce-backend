@@ -11,6 +11,7 @@ const auth = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_KEY);
     // console.log(decoded);
     const user = await User.findById(decoded.userId);
+    // console.log("🙋‍♂️ User found:", user);
     if (!user) throw new Error("Authentication failed");
 
     req.user = user;
