@@ -192,6 +192,37 @@ const getPostedJobs = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+const updateJob = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = req.user;
+
+    if (!user || user.role !== "employer") {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    const existingJob = await JobData.findOne({ id: parseInt(id) });
+    if (!existingJob) {
+      return res.status(404).json({ message: "Job not found" });
+    }
+
+    // Ensure employer is updating their own job
+    if (existingJob.companyId != user.companyDetails?.companyId) {
+      return res.status(403).json({ message: "Access denied to update job" });
+    }
+
+    const updatedJob = await JobData.findOneAndUpdate(
+      { id: parseInt(id) },
+      { $set: req.body },
+      { new: true }
+    );
+
+    res.status(200).json({ success: true, job: updatedJob });
+  } catch (err) {
+    console.error("Error updating job:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 module.exports = {
   getJobs,
@@ -200,6 +231,7 @@ module.exports = {
   postJob,
   getAppliedJobs,
   getPostedJobs,
+  updateJob,
 };
 
 // Let's say "active" jobs are those posted in the last 30 days
