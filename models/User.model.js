@@ -22,6 +22,8 @@ const userSchema = new mongoose.Schema(
     linkedin: { type: String },
     verificationEmail: { type: String },
     imageUrl: { type: String },
+    resetPasswordToken: { type: String },
+    resetPasswordExpires: { type: Date },
 
     // ✅ Reference to full company data
     companyDetails: {
