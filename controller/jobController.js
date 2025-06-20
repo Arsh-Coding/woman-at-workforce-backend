@@ -72,6 +72,7 @@ const postJob = async (req, res) => {
       title,
       location,
       remote,
+      role,
       categoryIds,
       jobType,
       description,
