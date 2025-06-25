@@ -4,22 +4,36 @@ const Company = require("../models/company.model");
 
 const getJobs = async (req, res) => {
   try {
-    // console.log("here", req.user);
-    // const user = req.user;
-    // if (!user) {
-    //   return res.status(404).json({
-    //     success: false,
-    //     message: "User not found",
-    //   });
-    // }
+    // console.log("🟢 getJobs controller hit");
     const offset = parseInt(req.query.offset) || 0;
     const limit = parseInt(req.query.limit) || 10;
-    const jobs = await JobData.find().skip(offset).limit(limit);
 
-    const totalJobs = await JobData.countDocuments();
+    const keyword = req.query.keyword || "";
+    const location = req.query.location || "";
+    const categoryId = req.query.categoryId || "";
+
+    // Build filter object dynamically
+    const filter = {};
+
+    if (keyword) {
+      filter.title = { $regex: keyword, $options: "i" }; // Case-insensitive search
+    }
+
+    if (location) {
+      filter.location = location;
+    }
+
+    if (categoryId) {
+      filter.categoryIds = parseInt(categoryId);
+    }
+    // console.log("Filters applied:", filter);
+    // Apply filter and pagination
+    const jobs = await JobData.find(filter).skip(offset).limit(limit);
+    const totalJobs = await JobData.countDocuments(filter);
 
     res.json({ jobs, totalJobs });
   } catch (err) {
+    console.error("Error in getJobs:", err);
     res.status(500).send(err.message);
   }
 };
