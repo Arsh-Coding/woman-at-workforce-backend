@@ -7,12 +7,11 @@ const getJobs = async (req, res) => {
     // console.log("🟢 getJobs controller hit");
     const offset = parseInt(req.query.offset) || 0;
     const limit = parseInt(req.query.limit) || 10;
-
+    // console.log("Query received:", req.query);
     const keyword = req.query.keyword || "";
     const location = req.query.location || "";
     const categoryId = req.query.categoryId || "";
 
-    // Build filter object dynamically
     const filter = {};
 
     if (keyword) {
@@ -20,11 +19,22 @@ const getJobs = async (req, res) => {
     }
 
     if (location) {
-      filter.location = location;
+      if (typeof location === "string" && location.includes(",")) {
+        // Split the string into an array
+        filter.location = { $in: location.split(",").map((loc) => loc.trim()) };
+      } else {
+        filter.location = location;
+      }
     }
 
     if (categoryId) {
-      filter.categoryIds = parseInt(categoryId);
+      const categoryArray = categoryId.split(",").map((id) => parseInt(id));
+      filter.categoryIds = { $in: categoryArray };
+    }
+
+    if (req.query.jobType) {
+      const jobTypes = req.query.jobType.split(",");
+      filter.jobType = { $in: jobTypes };
     }
     // console.log("Filters applied:", filter);
     // Apply filter and pagination
